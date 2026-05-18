@@ -1,0 +1,70 @@
+volumes:
+  mysql_vol: null
+services:
+  frappe:
+    container_name: "${FRAPPE_CONTAINER_NAME}"
+    environment:
+      - FRAPPE_CONTAINER_NAME=${FRAPPE_CONTAINER_NAME}
+      - MARIADB_CONTAINER_NAME=${MARIADB_CONTAINER_NAME}
+      - REDIS_CACHE_CONTAINER_NAME=${REDIS_CACHE_CONTAINER_NAME}
+      - REDIS_QUEUE_CONTAINER_NAME=${REDIS_QUEUE_CONTAINER_NAME}
+      - REDIS_SOCKETIO_CONTAINER_NAME=${REDIS_SOCKETIO_CONTAINER_NAME}
+      - SITE_NAME=${SITE_NAME}
+    image: frappe/bench:latest
+    command: >
+      sh -c "cp /opt/frappe-startup-scripts/*.sh /workspace/ &&
+             cp /opt/docker_windows_install_app.sh /workspace/ &&
+             sleep infinity"
+    volumes:
+      - ./${PROJECT_NAME}-docker:/workspace:cached
+      - ./frappe-startup-scripts:/opt/frappe-startup-scripts:ro
+      - ./docker_windows_install_app.sh:/opt/docker_windows_install_app.sh:ro
+      - ./${PROJECT_NAME}-docker/mariadb-backup:/etc/mariadb-backup
+      - ./mariadb-backup-scripts/backup_mariadb.sh:/etc/mariadb-backup-scripts/backup_mariadb.sh
+      - ./mariadb-backup-scripts/mariadbcron:/etc/mariadb-backup-scripts/mariadbcron
+    networks:
+      static-network:
+        ipv4_address: "10.88.${PROJECT_IP_NUMBER}.2"
+
+    working_dir: /workspace
+    ports:
+      - "${FRAPPE_PORT_START}-${FRAPPE_PORT_END}:8000-8005"
+      - "${SOCKETIO_PORT_START}-${SOCKETIO_PORT_END}:9000-9005"
+  mariadb:
+    container_name: "${MARIADB_CONTAINER_NAME}"
+    build: ./custom-mariadb/
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=root
+    networks:
+      static-network:
+        ipv4_address: "10.88.${PROJECT_IP_NUMBER}.3"
+    volumes:
+      - mysql_vol:/var/lib/mysql
+
+  redis-cache:
+    container_name: "${REDIS_CACHE_CONTAINER_NAME}"
+    image: redis:alpine
+    networks:
+      static-network:
+        ipv4_address: "10.88.${PROJECT_IP_NUMBER}.4"
+
+  redis-queue:
+    container_name: "${REDIS_QUEUE_CONTAINER_NAME}"
+    image: redis:alpine
+    networks:
+      static-network:
+        ipv4_address: "10.88.${PROJECT_IP_NUMBER}.5"
+
+  redis-socketio:
+    container_name: "${REDIS_SOCKETIO_CONTAINER_NAME}"
+    image: redis:alpine
+    networks:
+      static-network:
+        ipv4_address: "10.88.${PROJECT_IP_NUMBER}.6"
+
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: "10.88.${PROJECT_IP_NUMBER}.0/24"

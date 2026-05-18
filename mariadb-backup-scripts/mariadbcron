@@ -1,0 +1,1 @@
+0 * * * * /bin/bash -c "/etc/mariadb-backup-scripts/backup_mariadb.sh" >> /workspace/mariadbdumpscript.log 2>&1
