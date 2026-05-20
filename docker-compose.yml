@@ -17,7 +17,6 @@ services:
     volumes:
       - ./${PROJECT_NAME}-docker:/workspace:cached
       - ./frappe-startup-scripts:/opt/frappe-startup-scripts:ro
-      - ./docker_windows_install_app.sh:/opt/docker_windows_install_app.sh:ro
       - ./${PROJECT_NAME}-docker/mariadb-backup:/etc/mariadb-backup
       - ./mariadb-backup-scripts/backup_mariadb.sh:/etc/mariadb-backup-scripts/backup_mariadb.sh
       - ./mariadb-backup-scripts/mariadbcron:/etc/mariadb-backup-scripts/mariadbcron
