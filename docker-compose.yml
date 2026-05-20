@@ -13,7 +13,6 @@ services:
     image: frappe/bench:latest
     command: >
       sh -c "cp /opt/frappe-startup-scripts/*.sh /workspace/ &&
-             cp /opt/docker_windows_install_app.sh /workspace/ &&
              sleep infinity"
     volumes:
       - ./${PROJECT_NAME}-docker:/workspace:cached
