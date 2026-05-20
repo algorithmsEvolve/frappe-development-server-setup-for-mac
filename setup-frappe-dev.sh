@@ -336,12 +336,20 @@ prompt_yes_no() {
 
   while true; do
     value="$(prompt_text "$label (Y/N)" "$default_value")"
-    case "${value^^}" in
+    case "$(to_upper "$value")" in
       Y|YES) return 0 ;;
       N|NO) return 1 ;;
       *) warn "Please type Y or N." ;;
     esac
   done
+}
+
+to_lower() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+to_upper() {
+  printf '%s' "$1" | tr '[:lower:]' '[:upper:]'
 }
 
 is_integer() {
@@ -368,7 +376,7 @@ expand_path() {
       drive="${path:0:1}"
       rest="${path:2}"
       rest="${rest//\\//}"
-      drive="${drive,,}"
+      drive="$(to_lower "$drive")"
       if [[ -d "/mnt/$drive" ]]; then
         printf '/mnt/%s%s' "$drive" "$rest"
       elif [[ -d "/$drive" ]]; then
@@ -402,7 +410,7 @@ windows_profile_dir() {
       drive="${profile:0:1}"
       rest="${profile:2}"
       rest="${rest//\\//}"
-      drive="${drive,,}"
+      drive="$(to_lower "$drive")"
       if [[ -d "/mnt/$drive" ]]; then
         printf '/mnt/%s%s' "$drive" "$rest"
       elif [[ -d "/$drive" ]]; then
@@ -705,7 +713,7 @@ version_screen() {
 
   while true; do
     value="$(prompt_text "Choose version number or type v12-v16" "v$DEFAULT_VERSION")"
-    case "${value,,}" in
+    case "$(to_lower "$value")" in
       1|12|v12) FRAPPE_VERSION="12"; return ;;
       2|13|v13) FRAPPE_VERSION="13"; return ;;
       3|14|v14) FRAPPE_VERSION="14"; return ;;
@@ -769,7 +777,7 @@ ssh_key_screen() {
       printf '  S. Skip SSH key copy\n\n'
       value="$(prompt_text "Choose SSH key" "1")"
 
-      case "${value,,}" in
+      case "$(to_lower "$value")" in
         s|skip) SSH_KEY_PATH=""; SSH_PUBLIC_KEY_PATH=""; SSH_KEY_DEST_NAME=""; return ;;
         c|custom)
           custom_path="$(prompt_text "Custom private key path")"
@@ -789,7 +797,7 @@ ssh_key_screen() {
       printf '  S. Skip SSH key copy\n\n'
       value="$(prompt_text "Choose" "S")"
 
-      case "${value,,}" in
+      case "$(to_lower "$value")" in
         s|skip|"") SSH_KEY_PATH=""; SSH_PUBLIC_KEY_PATH=""; SSH_KEY_DEST_NAME=""; return ;;
         c|custom)
           custom_path="$(prompt_text "Custom private key path")"
